@@ -7,24 +7,58 @@ class Program
         var fieldWidth = 40;
         var fieldHeight = 30;
         var field = new bool[fieldWidth, fieldHeight];
-        field[4,5] = true;
-
-        for (int row = 0; row < fieldHeight; row++)
+        field[4, 5] = true;
+        var x = 6;
+        var y = 1;
+        while (true)
         {
-            for (int column = 0; column < fieldWidth; column++)
+            Console.CursorLeft = 0;
+            Console.CursorTop = 0;
+            for (int row = 0; row < fieldHeight; row++)
             {
-                if (field[column,row])
+
+                for (int column = 0; column < fieldWidth; column++)
                 {
-                    Console.Write('*');
-                } 
-                else
-                {
-                    Console.Write('.');
-                }  
+                    if (field[column, row])
+                    {
+                        Console.Write('*');
+                    }
+                    else
+                    {
+                        Console.Write('.');
+                    }
+                }
+                Console.WriteLine();
             }
-            Console.WriteLine();    
+            Console.CursorLeft = x;
+            Console.CursorTop = y;
+
+            var k = Console.ReadKey();
+            switch (k.Key)
+            {
+                case ConsoleKey.LeftArrow:
+                    if (x > 0)
+                        x--;
+                    break;
+
+                case ConsoleKey.RightArrow:
+                    if (x < fieldWidth - 1)
+                        x++;
+                    break;
+                case ConsoleKey.UpArrow:
+                    if (y > 0)
+                        y--;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    if (y < fieldHeight - 1)
+                        y++;
+                    break;
+                case ConsoleKey.Spacebar:
+                field[x,y]=!field [x,y];
+                        
+                    break;
+            }
         }
-        
-        Console.ReadKey();
     }
 }
