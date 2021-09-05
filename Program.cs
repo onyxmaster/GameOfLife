@@ -65,47 +65,61 @@ static class Program
                 Save();
                 break;
 
-             case ConsoleKey.L:
+            case ConsoleKey.L:
                 Load();
                 break;
-                
+
+            case ConsoleKey.C:
+                Array.Clear(_field, 0, _field.GetLength(0) * _field.GetLength(1));
+                break;
         }
     }
 
     private static void Save()
     {
-        var fileName = "test.field";
+        Console.Clear();
+        Console.Write("Введите название: ");
+        var name = Console.ReadLine();
+        var fileName = $"{name}.field";
         using (var file = File.Open(fileName, FileMode.Create))
         {
             var writer = new BinaryWriter(file);
-            writer.Write(_field.GetLength(0)); 
+            writer.Write(_field.GetLength(0));
             writer.Write(_field.GetLength(1));
             for (int row = 0; row < _field.GetLength(1); row++)
             {
                 for (int column = 0; column < _field.GetLength(0); column++)
                 {
-                    writer.Write(_field[column, row]);                   
+                    writer.Write(_field[column, row]);
                 }
-            }    
+            }
         }
     }
 
     private static void Load()
     {
-        var fileName = "test.field";
+        Console.Clear();
+        Console.Write("Введите название: ");
+        var name = Console.ReadLine();
+        var fileName = $"{name}.field";
+        if (!File.Exists(fileName))
+        {
+            return;
+        }
+
         using (var file = File.Open(fileName, FileMode.Open))
         {
             var reader = new BinaryReader(file);
             var width = reader.ReadInt32();
             var height = reader.ReadInt32();
-            var field = new bool[width, height]; 
+            var field = new bool[width, height];
             for (int row = 0; row < field.GetLength(1); row++)
             {
                 for (int column = 0; column < field.GetLength(0); column++)
                 {
                     field[column, row] = reader.ReadBoolean();
                 }
-            }    
+            }
             _field = field;
         }
     }
