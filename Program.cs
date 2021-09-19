@@ -3,7 +3,7 @@ using System.IO;
 
 static class Program
 {
-    static bool[,] _field;
+    static uint[,] _field;
     static int _x, _y;
     static Rules _rules;
 
@@ -11,16 +11,17 @@ static class Program
     {
         Conway,
         Avgust,
+        Ulam,
     }
 
     static void Main(string[] args)
     {
         const int FieldWidth = 100;
         const int FieldHeight = 50;
-        _field = new bool[FieldWidth, FieldHeight];
+        _field = new uint[FieldWidth, FieldHeight];
         _x = 6;
         _y = 1;
-        _rules = Rules.Conway;
+        _rules = Rules.Avgust;
         while (true)
         {
             DrawField();
@@ -54,7 +55,7 @@ static class Program
                 break;
 
             case ConsoleKey.Spacebar:
-                _field[_x, _y] = !_field[_x, _y];
+                _field[_x, _y] = _field[_x, _y] == 0 ? 1u : 0u;
                 break;
 
             case ConsoleKey.N:
@@ -112,12 +113,12 @@ static class Program
             var reader = new BinaryReader(file);
             var width = reader.ReadInt32();
             var height = reader.ReadInt32();
-            var field = new bool[width, height];
+            var field = new uint[width, height];
             for (int row = 0; row < field.GetLength(1); row++)
             {
                 for (int column = 0; column < field.GetLength(0); column++)
                 {
-                    field[column, row] = reader.ReadBoolean();
+                    field[column, row] = reader.ReadUInt32();
                 }
             }
             _field = field;
@@ -125,46 +126,75 @@ static class Program
     }
 
     static int GetNeighborCount(int column, int row)
+    {   
+        var width = _field.GetLength(0);
+        var height = _field.GetLength(1);
+        var count = 0;
+        if (row > 0 && column > 0 && _field[column - 1, row - 1] != 0)
+        {
+            count++;
+        }
+
+        if (row > 0 && _field[column, row - 1] != 0)
+        {
+            count++;
+        }
+
+        if (row > 0 && column < width - 1 && _field[column + 1, row - 1] != 0)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && _field[column + 1, row] != 0)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && row < height - 1 && _field[column + 1, row + 1] != 0)
+        {
+            count++;
+        }
+
+        if (row < height - 1 && _field[column, row + 1] != 0)
+        {
+            count++;
+        }
+
+        if (row < height - 1 && column > 0 && _field[column - 1, row + 1] != 0)
+        {
+            count++;
+        }
+
+        if (column > 0 && _field[column - 1, row] != 0)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    static int GetNeighborCount2(int column, int row)
     {
         var width = _field.GetLength(0);
         var height = _field.GetLength(1);
         var count = 0;
-        if (row > 0 && column > 0 && _field[column - 1, row - 1])
+        if (row > 0 && _field[column, row - 1] != 0)
         {
             count++;
         }
 
-        if (row > 0 && _field[column, row - 1])
+        if (column < width - 1 && _field[column + 1, row] != 0)
         {
             count++;
         }
 
-        if (row > 0 && column < width - 1 && _field[column + 1, row - 1])
+        if (row < height - 1 && _field[column, row + 1] != 0)
         {
             count++;
         }
 
-        if (column < width - 1 && _field[column + 1, row])
-        {
-            count++;
-        }
 
-        if (column < width - 1 && row < height - 1 && _field[column + 1, row + 1])
-        {
-            count++;
-        }
-
-        if (row < height - 1 && _field[column, row + 1])
-        {
-            count++;
-        }
-
-        if (row < height - 1 && column > 0 && _field[column - 1, row + 1])
-        {
-            count++;
-        }
-
-        if (column > 0 && _field[column - 1, row])
+        if (column > 0 && _field[column - 1, row] != 0)
         {
             count++;
         }
@@ -176,43 +206,71 @@ static class Program
     {
         var width = _field.GetLength(0);
         var height = _field.GetLength(1);
-        var newField = new bool[width, height];
+        var newField = new uint[width, height];
         for (int row = 0; row < height; row++)
         {
             for (int column = 0; column < width; column++)
             {
-                var count = GetNeighborCount(column, row);
                 switch (_rules)
                 {
                     case Rules.Conway:
-                        if (_field[column, row])
                         {
-                            if (count == 2 || count == 3)
+                            var count = GetNeighborCount(column, row);
+
+                            if (_field[column, row] != 0)
                             {
-                                newField[column, row] = true;
+                                if (count == 2 || count == 3)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
                             }
-                        }
-                        else
-                        {
-                            if (count == 3)
+                            else
                             {
-                                newField[column, row] = true;
+                                if (count == 3)
+                                {
+                                    newField[column, row] = 1;
+                                }
                             }
+                            break;
                         }
-                        break;
 
                     case Rules.Avgust:
-                        if (_field[column, row])
                         {
-                        }
-                        else
-                        {
-                            if (count == 2)
+                            var count = GetNeighborCount(column, row);
+
+                            if (_field[column, row] != 0)
                             {
-                                newField[column, row] = true;
                             }
+                            else
+                            {
+                                if (count == 2)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
                         }
-                        break;
+
+                    case Rules.Ulam:
+                        {
+                            var count = GetNeighborCount2(column, row);
+
+                            if (_field[column, row] != 0)
+                            {
+                                if (_field[column, row] < 3)
+                                {
+                                   _field[column, row] += 1;
+                                }
+                            }
+                            else
+                            {
+                                if (count == 1)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            break;
+                        }
                 }
             }
         }
@@ -228,7 +286,7 @@ static class Program
         {
             for (int column = 0; column < _field.GetLength(0); column++)
             {
-                if (_field[column, row])
+                if (_field[column, row] != 0)
                 {
                     Console.Write('*');
                 }
