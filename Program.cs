@@ -12,16 +12,19 @@ static class Program
         Conway,
         Avgust,
         Ulam,
+        HighLife,
     }
 
     static void Main(string[] args)
     {
+        Console.CursorVisible = false;
         const int FieldWidth = 100;
         const int FieldHeight = 50;
         _field = new uint[FieldWidth, FieldHeight];
         _x = 6;
         _y = 1;
-        _rules = Rules.Avgust;
+        _rules = Rules.Conway;
+        OnRandom(0.10);
         while (true)
         {
             DrawField();
@@ -126,7 +129,7 @@ static class Program
     }
 
     static int GetNeighborCount(int column, int row)
-    {   
+    {
         var width = _field.GetLength(0);
         var height = _field.GetLength(1);
         var count = 0;
@@ -216,7 +219,6 @@ static class Program
                     case Rules.Conway:
                         {
                             var count = GetNeighborCount(column, row);
-
                             if (_field[column, row] != 0)
                             {
                                 if (count == 2 || count == 3)
@@ -237,7 +239,6 @@ static class Program
                     case Rules.Avgust:
                         {
                             var count = GetNeighborCount(column, row);
-
                             if (_field[column, row] != 0)
                             {
                             }
@@ -254,12 +255,11 @@ static class Program
                     case Rules.Ulam:
                         {
                             var count = GetNeighborCount2(column, row);
-
                             if (_field[column, row] != 0)
                             {
                                 if (_field[column, row] < 3)
                                 {
-                                   _field[column, row] += 1;
+                                    _field[column, row] += 1;
                                 }
                             }
                             else
@@ -271,6 +271,27 @@ static class Program
                             }
                             break;
                         }
+                    case Rules.HighLife:
+                        {
+                            var count = GetNeighborCount(column, row);
+
+                            if (_field[column, row] != 0)
+                            {
+                                if (count == 2 || count == 3)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            else
+                            {
+                                if (count is 3 or 6)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+
                 }
             }
         }
@@ -300,5 +321,19 @@ static class Program
 
         Console.CursorLeft = _x;
         Console.CursorTop = _y;
+    }
+    static void OnRandom(double probability)
+    {
+        var rng = new Random();
+        for (int row = 0; row < _field.GetLength(1); row++)
+        {
+            for (int column = 0; column < _field.GetLength(0); column++)
+            {
+                if (rng.NextDouble() < probability)
+                {
+                    _field[column, row] = 1;
+                }
+            }
+        }
     }
 }
