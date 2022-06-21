@@ -13,28 +13,30 @@ static class Program
         Avgust,
         Ulam,
         HighLife,
+        AvgustConway,
+        LifeWithoutDead,
+        DayAndNight
     }
 
     static void Main(string[] args)
     {
         Console.CursorVisible = false;
-        const int FieldWidth = 100;
-        const int FieldHeight = 50;
+        const int FieldWidth = 70;
+        const int FieldHeight = 40;
         _field = new uint[FieldWidth, FieldHeight];
         _x = 6;
         _y = 1;
-        _rules = Rules.Conway;
-        OnRandom(0.10);
+        OnRandom(0.3); 
+        _rules = Rules.DayAndNight;
         while (true)
         {
             DrawField();
             ProcessInput();
         }
     }
-
     static void ProcessInput()
     {
-        var k = Console.ReadKey();
+        var k = Console.ReadKey(true);
         switch (k.Key)
         {
             case ConsoleKey.LeftArrow:
@@ -76,9 +78,23 @@ static class Program
             case ConsoleKey.C:
                 Array.Clear(_field, 0, _field.GetLength(0) * _field.GetLength(1));
                 break;
+            case ConsoleKey.R:
+                switch (Console.ReadLine())
+                {
+                    case "Conway":
+                        _rules = Rules.Conway;
+                        break;
+                    case "Avgust":
+                    case "Seeds":
+                        _rules = Rules.Avgust;
+                        break;
+                    case "HighLife":
+                        _rules = Rules.HighLife;
+                        break;
+                }
+                break;
         }
     }
-
     private static void Save()
     {
         Console.Clear();
@@ -291,7 +307,57 @@ static class Program
                             }
                             break;
                         }
-
+                    case Rules.AvgustConway:
+                        {
+                            int count = GetNeighborCount(column, row);
+                            if (count == 2)
+                            {
+                                newField[column, row] = 1;
+                            }
+                            if (_field[column, row] != 0)
+                            {
+                                if (count == 2 || count == 3)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.LifeWithoutDead:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                                newField[column, row] = _field[column, row] + 1;
+                            }
+                            else
+                            {
+                                if (count == 3)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.DayAndNight:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                                if (count is 3 or 4 or 6 or 7 or 8)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            else
+                            {
+                                if (count is 3 or 6 or 7 or 8)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
                 }
             }
         }
@@ -313,6 +379,7 @@ static class Program
                 }
                 else
                 {
+
                     Console.Write('.');
                 }
             }
