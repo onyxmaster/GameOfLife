@@ -15,7 +15,12 @@ static class Program
         HighLife,
         AvgustConway,
         LifeWithoutDead,
-        DayAndNight
+        DayAndNight,
+        Avgust2,
+        Wind,
+        StableLife,
+        NotStableLife,
+        HardLife,
     }
 
     static void Main(string[] args)
@@ -24,10 +29,9 @@ static class Program
         const int FieldWidth = 70;
         const int FieldHeight = 40;
         _field = new uint[FieldWidth, FieldHeight];
-        _x = 6;
-        _y = 1;
-        OnRandom(0.3); 
-        _rules = Rules.DayAndNight;
+        _x = 20;
+        _y = 20;
+        _rules = Rules.NotStableLife;
         while (true)
         {
             DrawField();
@@ -60,7 +64,15 @@ static class Program
                 break;
 
             case ConsoleKey.Spacebar:
-                _field[_x, _y] = _field[_x, _y] == 0 ? 1u : 0u;
+                if (_rules != Rules.HardLife)
+                    _field[_x, _y] = _field[_x, _y] == 0 ? 1u : 0u;
+                else
+                {
+                    if (_field[_x, _y] != 4)
+                        _field[_x, _y]++;
+                    else
+                        _field[_x, _y] = 0;
+                }
                 break;
 
             case ConsoleKey.N:
@@ -91,6 +103,15 @@ static class Program
                     case "HighLife":
                         _rules = Rules.HighLife;
                         break;
+                }
+                break;
+            case ConsoleKey.I:
+                for (int row = 0; row < _field.GetLength(1); row++)
+                {
+                    for (int column = 0; column < _field.GetLength(0); column++)
+                    {
+                        _field[column, row] = (uint)(_field[column, row] != 0 ? 0 : 1);
+                    }
                 }
                 break;
         }
@@ -180,6 +201,90 @@ static class Program
         }
 
         if (row < height - 1 && column > 0 && _field[column - 1, row + 1] != 0)
+        {
+            count++;
+        }
+
+        if (column > 0 && _field[column - 1, row] != 0)
+        {
+            count++;
+        }
+
+        return count;
+    }
+    static int GetNeighborCount(int column, int row, int cell)
+    {
+        var width = _field.GetLength(0);
+        var height = _field.GetLength(1);
+        var count = 0;
+        if (row > 0 && column > 0 && _field[column - 1, row - 1] == cell)
+        {
+            count++;
+        }
+
+        if (row > 0 && _field[column, row - 1] == cell)
+        {
+            count++;
+        }
+
+        if (row > 0 && column < width - 1 && _field[column + 1, row - 1] == cell)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && _field[column + 1, row] == cell)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && row < height - 1 && _field[column + 1, row + 1] == cell)
+        {
+            count++;
+        }
+
+        if (row < height - 1 && _field[column, row + 1] == cell)
+        {
+            count++;
+        }
+
+        if (row < height - 1 && column > 0 && _field[column - 1, row + 1] == cell)
+        {
+            count++;
+        }
+
+        if (column > 0 && _field[column - 1, row] == cell)
+        {
+            count++;
+        }
+
+        return count;
+    }
+    static int GetHexNeighborCount(int column, int row)
+    {
+        var width = _field.GetLength(0);
+        var height = _field.GetLength(1);
+        var count = 0;
+        if (row > 0 && column > 0 && _field[column - 1, row - 1] != 0)
+        {
+            count++;
+        }
+
+        if (row > 0 && _field[column, row - 1] != 0)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && _field[column + 1, row] != 0)
+        {
+            count++;
+        }
+
+        if (column < width - 1 && row < height - 1 && _field[column + 1, row + 1] != 0)
+        {
+            count++;
+        }
+
+        if (row < height - 1 && _field[column, row + 1] != 0)
         {
             count++;
         }
@@ -354,6 +459,119 @@ static class Program
                                 if (count is 3 or 6 or 7 or 8)
                                 {
                                     newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.Avgust2:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                            }
+                            else
+                            {
+                                if (count == 2 || count == 4)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.Wind:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                            }
+                            else
+                            {
+                                if (count is 3 || column != 0 && _field[column - 1, row] != 0)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.StableLife:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                                if (count is 2 or 3 or 4 or 8)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            else
+                            {
+                                if (count == 3)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+
+                        }
+                    case Rules.NotStableLife:
+                        {
+                            var count = GetNeighborCount(column, row);
+                            if (_field[column, row] != 0)
+                            {
+                                if (count is 2 or 4 or 5)
+                                {
+                                    newField[column, row] = _field[column, row] + 1;
+                                }
+                            }
+                            else
+                            {
+                                if (count is 3 or 5)
+                                {
+                                    newField[column, row] = 1;
+                                }
+                            }
+                            break;
+                        }
+                    case Rules.HardLife:
+                        {
+                            int NeighborCount(int cell)
+                            {
+                                return GetNeighborCount(column, row, cell);
+                            }
+                            if (_field[column, row] == 1)
+                            {
+                                if (NeighborCount(2) > 2)
+                                {
+                                    _field[column, row] = 0;
+                                }
+                            }
+                            if (_field[column, row] == 3)
+                            {
+                                var leftAndRightExpand = true;
+                                if (column != 0 && _field[column - 1, row] == 0)
+                                {
+                                    _field[column - 1, row] = 3;
+                                }
+                                else
+                                {
+                                    leftAndRightExpand = false;
+                                }
+                                if (column != _field.GetLength(0) && _field[column + 1, row] == 0)
+                                {
+                                    _field[column - 1, row] = 3;
+                                }
+                                else
+                                {
+                                    leftAndRightExpand = false;
+                                }
+                                var upExpand = true;
+                                if (leftAndRightExpand && row != 0 && _field[column, row - 1] == 0)
+                                {
+                                    
+                                }
+                                else
+                                {
+                                    upExpand = false;
                                 }
                             }
                             break;
