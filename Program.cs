@@ -31,10 +31,10 @@ static class Program
         _field = new uint[FieldWidth, FieldHeight];
         _x = 20;
         _y = 20;
-        _rules = Rules.Avgust;
+        _rules = Rules.LifeWithoutDead;
         while (true)
         {
-            DrawField();
+            DrawField2();
             ProcessInput();
         }
     }
@@ -588,7 +588,7 @@ static class Program
                             {
                                 if (NeighborCount(2) > 2)
                                 {
-                                    _field[column, row] = 0;
+                                    newField[column, row] = 0;
                                 }
                             }
                             if (_field[column, row] == 3)
@@ -604,7 +604,7 @@ static class Program
                                 }
                                 if (column != _field.GetLength(0) && _field[column + 1, row] == 0)
                                 {
-                                    _field[column + 1, row] = 3;
+                                    newField[column + 1, row] = 3;
                                 }
                                 else
                                 {
@@ -613,7 +613,7 @@ static class Program
                                 var upExpand = true;
                                 if (leftAndRightExpand && row != 0 && _field[column, row - 1] == 0)
                                 {
-                                    _field[column, row - 1] = 3;
+                                    newField[column, row - 1] = 3;
                                 }
                                 else
                                 {
@@ -621,7 +621,7 @@ static class Program
                                 }
                                 if (!upExpand && row != _field.GetLength(1) && _field[column, row + 1] == 0)
                                 {
-                                    _field[column, row + 1] = 3;
+                                    newField[column, row + 1] = 3;
                                 }
                             }
                             if (_field[column, row] == 4)
@@ -629,7 +629,7 @@ static class Program
                                 NeighborAsGreenCell(column, row);
                                 if (NeighborCount(4) == 0)
                                 {
-                                    _field[column, row] = 0;
+                                    newField[column, row] = 0;
                                 }
                             }
                             break;
@@ -687,6 +687,12 @@ static class Program
                         break;
                     case 4:
                         Console.ForegroundColor = ConsoleColor.Green;
+                        break;
+                    case 5:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case 6:
+                        Console.ForegroundColor = ConsoleColor.Red;
                         break;
                 }
                 Console.Write(print);
