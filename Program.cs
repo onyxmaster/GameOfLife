@@ -31,7 +31,7 @@ static class Program
         _field = new uint[FieldWidth, FieldHeight];
         _x = 20;
         _y = 20;
-        _rules = Rules.NotStableLife;
+        _rules = Rules.Avgust;
         while (true)
         {
             DrawField();
@@ -325,7 +325,53 @@ static class Program
 
         return count;
     }
+    static int NeighborAsGreenCell(int column, int row)
+    {
+        var width = _field.GetLength(0);
+        var height = _field.GetLength(1);
+        var count = 0;
+        if (row > 0 && column > 0 && _field[column - 1, row - 1] == 3)
+        {
+            _field[column - 1, row - 1] = 4;
+        }
 
+        if (row > 0 && _field[column, row - 1] == 3)
+        {
+            _field[column, row - 1] = 4;
+        }
+
+        if (row > 0 && column < width - 1 && _field[column + 1, row - 1] == 3)
+        {
+            _field[column + 1, row - 1] = 4;
+        }
+
+        if (column < width - 1 && _field[column + 1, row] == 3)
+        {
+            _field[column + 1, row] = 4;
+        }
+
+        if (column < width - 1 && row < height - 1 && _field[column + 1, row + 1] == 3)
+        {
+            _field[column + 1, row + 1] = 4;
+        }
+
+        if (row < height - 1 && _field[column, row + 1] == 3)
+        {
+            _field[column, row + 1] = 4;
+        }
+
+        if (row < height - 1 && column > 0 && _field[column - 1, row + 1] == 3)
+        {
+            _field[column - 1, row + 1] = 4;
+        }
+
+        if (column > 0 && _field[column - 1, row] == 3)
+        {
+            _field[column - 1, row] = 4;
+        }
+
+        return count;
+    }
     static void Evolution()
     {
         var width = _field.GetLength(0);
@@ -558,7 +604,7 @@ static class Program
                                 }
                                 if (column != _field.GetLength(0) && _field[column + 1, row] == 0)
                                 {
-                                    _field[column - 1, row] = 3;
+                                    _field[column + 1, row] = 3;
                                 }
                                 else
                                 {
@@ -567,11 +613,23 @@ static class Program
                                 var upExpand = true;
                                 if (leftAndRightExpand && row != 0 && _field[column, row - 1] == 0)
                                 {
-                                    
+                                    _field[column, row - 1] = 3;
                                 }
                                 else
                                 {
                                     upExpand = false;
+                                }
+                                if (!upExpand && row != _field.GetLength(1) && _field[column, row + 1] == 0)
+                                {
+                                    _field[column, row + 1] = 3;
+                                }
+                            }
+                            if (_field[column, row] == 4)
+                            {
+                                NeighborAsGreenCell(column, row);
+                                if (NeighborCount(4) == 0)
+                                {
+                                    _field[column, row] = 0;
                                 }
                             }
                             break;
@@ -604,6 +662,38 @@ static class Program
             Console.WriteLine();
         }
 
+        Console.CursorLeft = _x;
+        Console.CursorTop = _y;
+    }
+    static void DrawField2()
+    {
+        Console.CursorLeft = 0;
+        Console.CursorTop = 0;
+        for (int row = 0; row < _field.GetLength(1); row++)
+        {
+            for (int column = 0; column < _field.GetLength(0); column++)
+            {
+                char print = '#';
+                switch (_field[column, row])
+                {
+                    case 0:
+                        print = '.';
+                        break;
+                    case 2:
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        break;
+                    case 3:
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        break;
+                    case 4:
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        break;
+                }
+                Console.Write(print);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            Console.WriteLine();
+        }
         Console.CursorLeft = _x;
         Console.CursorTop = _y;
     }
